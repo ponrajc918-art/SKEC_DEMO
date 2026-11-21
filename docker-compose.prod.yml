@@ -1,0 +1,107 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build: ./backend
+    command: ["alembic", "-c", "alembic.ini", "upgrade", "head"]
+    environment:
+      APP_ENV: production
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      SESSION_SECRET: ${SESSION_SECRET}
+      PASSWORD_HISTORY_COUNT: ${PASSWORD_HISTORY_COUNT:-5}
+      BACKEND_CORS_ORIGINS: https://${DOMAIN}
+      PUBLIC_SITE_URL: https://${DOMAIN}
+      FIELD_ENCRYPTION_KEY: ${FIELD_ENCRYPTION_KEY}
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: "no"
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      SESSION_SECRET: ${SESSION_SECRET}
+      PASSWORD_HISTORY_COUNT: ${PASSWORD_HISTORY_COUNT:-5}
+      BACKEND_CORS_ORIGINS: https://${DOMAIN}
+      PUBLIC_SITE_URL: https://${DOMAIN}
+      FIELD_ENCRYPTION_KEY: ${FIELD_ENCRYPTION_KEY}
+      MFA_ISSUER_NAME: ${MFA_ISSUER_NAME:-SKEC Digital Campus}
+      MFA_REQUIRED_ROLES: ${MFA_REQUIRED_ROLES:-principal,hod,college_admin}
+      EMAIL_MODE: ${EMAIL_MODE:-mock}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
+      SMS_PROVIDER: ${SMS_PROVIDER:-disabled}
+      SMS_ENDPOINT: ${SMS_ENDPOINT:-}
+      SMS_API_TOKEN: ${SMS_API_TOKEN:-}
+      SMS_SENDER_ID: ${SMS_SENDER_ID:-}
+      OTP_EXPIRY_MINUTES: ${OTP_EXPIRY_MINUTES:-10}
+      OTP_MAX_ATTEMPTS: ${OTP_MAX_ATTEMPTS:-5}
+      OTP_RESEND_COOLDOWN_SECONDS: ${OTP_RESEND_COOLDOWN_SECONDS:-60}
+      PAYMENT_MODE: ${PAYMENT_MODE:-test}
+      ALLOW_LIVE_PAYMENTS: ${ALLOW_LIVE_PAYMENTS:-false}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
+      PRIVATE_STORAGE_ROOT: ${PRIVATE_STORAGE_ROOT:-/var/lib/skec-private}
+      PRIVATE_UPLOAD_MAX_BYTES: ${PRIVATE_UPLOAD_MAX_BYTES:-10485760}
+      FILE_SCANNER_MODE: ${FILE_SCANNER_MODE:-disabled}
+      CLAMD_HOST: ${CLAMD_HOST:-}
+      CLAMD_PORT: ${CLAMD_PORT:-3310}
+      CLAMD_TIMEOUT_SECONDS: ${CLAMD_TIMEOUT_SECONDS:-15}
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    volumes:
+      - private_storage:/var/lib/skec-private
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://backend:8000
+    depends_on:
+      backend: { condition: service_healthy }
+
+  caddy:
+    image: caddy:2.8-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./deployment/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      frontend: { condition: service_started }
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:
+  private_storage:

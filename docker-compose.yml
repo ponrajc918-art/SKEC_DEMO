@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: skec_campus
+      POSTGRES_USER: skec_app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-this-local-password}
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U skec_app -d skec_campus"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://skec_app:${POSTGRES_PASSWORD:-change-this-local-password}@postgres:5432/skec_campus
+      SESSION_SECRET: ${SESSION_SECRET:-replace-before-production}
+      APP_ENV: development
+      EMAIL_MODE: ${EMAIL_MODE:-mock}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
+      SMS_PROVIDER: ${SMS_PROVIDER:-disabled}
+      SMS_ENDPOINT: ${SMS_ENDPOINT:-}
+      SMS_API_TOKEN: ${SMS_API_TOKEN:-}
+      SMS_SENDER_ID: ${SMS_SENDER_ID:-}
+      OTP_EXPIRY_MINUTES: ${OTP_EXPIRY_MINUTES:-10}
+      OTP_MAX_ATTEMPTS: ${OTP_MAX_ATTEMPTS:-5}
+      OTP_RESEND_COOLDOWN_SECONDS: ${OTP_RESEND_COOLDOWN_SECONDS:-60}
+    depends_on:
+      postgres: { condition: service_healthy }
+    ports: ["8000:8000"]
+  frontend:
+    build: ./frontend
+    environment:
+      API_INTERNAL_URL: http://backend:8000
+    depends_on: [backend]
+    ports: ["3000:3000"]
+volumes:
+  postgres_data:

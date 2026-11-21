@@ -1,0 +1,80 @@
+# ---- Secrets and local environment ----
+.env
+.env.*
+!.env.example
+!.env.production.example
+*.pem
+*.key
+secrets/
+
+
+# ---- Node / Next.js ----
+node_modules/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+coverage/
+playwright-report/
+test-results/
+
+# ---- Python / FastAPI ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+*.egg-info/
+
+# ---- Databases and local data volumes ----
+*.sqlite3
+*.db
+pgdata/
+minio-data/
+uploads/
+private-storage/
+
+# ---- Docker / deployment ----
+docker-compose.override.yml
+deployment/**/*.local.*
+
+# ---- Editors and OS ----
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ---- Build and archive output ----
+dist/
+build/
+*.zip
+*.log
+
+# ---- Raw, unprocessed photographs supplied by the college ----
+# The incoming folder keeps its .gitkeep only; originals are not committed.
+assets/incoming/*
+!assets/incoming/.gitkeep
+
+# ---- Database backups ----
+*.dump
+*.bak
+*.backup
+
+# Additional local database and certificate files
+*.sqlite
+*.p12
+*.pfx
+*.crt
+*.cer
+
+# Temporary pre-change snapshots
+*.before_*
+# Temporary OTP backup files
+*.otp-backup

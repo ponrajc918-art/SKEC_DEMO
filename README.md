@@ -112,3 +112,5 @@ Validates the Phase 0 deliverables. It does not verify institutional facts; see 
 ## Limitations of the working environment
 
 The project is built through Claude Free chat with uploaded archives and downloadable files. Docker, a local PostgreSQL server and browser-based tests may not be runnable in that environment. Each phase report states exactly what was run and what was not.
+# SKEC
+

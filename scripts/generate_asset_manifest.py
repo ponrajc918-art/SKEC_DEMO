@@ -4,6 +4,9 @@
 Single source of truth for image slots: the SLOTS list below. Re-run after editing:
     python3 scripts/generate_asset_manifest.py
 """
+import sys
+if "--force" not in sys.argv:
+    raise SystemExit("Refusing to run: this Phase 0 generator would overwrite frontend/src/content/image-manifest.json and docs/ASSET_MANIFEST.md, which now hold real image data. Pass --force only if you intend that.")
 import json
 from pathlib import Path
 

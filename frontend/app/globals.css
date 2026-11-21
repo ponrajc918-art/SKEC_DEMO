@@ -216,30 +216,41 @@ button {
    ========================================= */
 
 /*
-  Add your authentic college photograph here:
-
-  public/images/campus-hero.jpg
-
-  Keep the dark overlay for text readability.
+  Hero photograph is rendered by next/image (see app/page.tsx, id "home.hero"
+  in src/content/image-manifest.json). The navy overlay below keeps text readable.
 */
 
 .hero {
-  background:
-    linear-gradient(
-      90deg,
-      rgba(16, 37, 63, .94) 0%,
-      rgba(20, 43, 70, .82) 48%,
-      rgba(23, 57, 95, .55) 100%
-    ),
-    url("/images/hero/campus-hero.png") center / cover no-repeat;
-
+  position: relative;
+  overflow: hidden;
+  background: #10253f;
   color: #fff;
   min-height: 530px;
   display: grid;
   align-items: end;
 }
 
+.hero-img {
+  object-fit: cover;
+  object-position: center 40%;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    90deg,
+    rgba(16, 37, 63, .94) 0%,
+    rgba(20, 43, 70, .82) 48%,
+    rgba(23, 57, 95, .55) 100%
+  );
+}
+
 .hero-inner {
+  position: relative;
+  z-index: 2;
   padding: 5rem 1.25rem;
   max-width: 1180px;
   margin: auto;
@@ -1339,5 +1350,94 @@ th {
     scroll-behavior: auto !important;
     animation: none !important;
     transition: none !important;
+  }
+}
+
+
+/* =========================================
+   PHOTOGRAPHS (components/media.tsx)
+   ========================================= */
+
+.brand-logo {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  background: #fff;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.photo {
+  margin: 0 0 1.5rem;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.photo-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.photo figcaption {
+  padding: .6rem .9rem;
+  font-size: .82rem;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+}
+
+.photo-row,
+.photo-grid {
+  display: grid;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.photo-row {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.photo-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.photo-row .photo,
+.photo-grid .photo {
+  margin: 0;
+}
+
+.profile {
+  display: grid;
+  grid-template-columns: minmax(220px, 360px) 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.profile h2 {
+  margin-top: 0;
+}
+
+.card.facility {
+  padding: 0;
+  overflow: hidden;
+}
+
+.card.facility .photo {
+  margin: 0;
+  border: 0;
+}
+
+.facility-body {
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+@media (max-width: 700px) {
+  .photo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile {
+    grid-template-columns: 1fr;
   }
 }

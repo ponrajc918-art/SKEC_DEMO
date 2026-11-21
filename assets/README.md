@@ -5,3 +5,5 @@
 
 Final, optimised images live in `frontend/public/images/<category>/`. Replacement steps are in `docs/ASSET_MANIFEST.md`.
 The Founder Chairman portrait must be the genuine photograph supplied by the project owner.
+
+- `unused/` : original photographs deliberately not published, with the reason for each (see `unused/README.md`).

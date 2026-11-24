@@ -167,10 +167,6 @@ def confirm_mobile_verification(payload:OtpVerifyIn,user:User=Depends(current_us
         db.rollback()
         raise HTTPException(status_code=409,detail={"code":"duplicate_mobile","message":"Mobile number is already registered"})
     return {"message":"mobile_verified"}
-@app.post("/api/v1/auth/mobile-verification/confirm")
-def confirm_mobile_verification(payload:OtpVerifyIn,user:User=Depends(current_user),_csrf:User=Depends(require_csrf),db:Session=Depends(get_db)):
-    if not verify_challenge(db,user,"sms","mobile_verification",payload.code):db.commit();raise HTTPException(status_code=400,detail={"code":"invalid_otp","message":"Verification code is invalid or expired"})
-    user.mobile_verified_at=now();audit(db,user.id,"mobile.verified","user",user.id);db.commit();return {"message":"mobile_verified"}
 @app.post("/api/v1/auth/logout")
 def logout(request:Request,response:Response,user:User=Depends(current_user),_csrf:User=Depends(require_csrf),db:Session=Depends(get_db)):
     raw=request.cookies.get(settings().session_cookie_name);record=db.get(SessionRecord,hash_token(raw or ""));

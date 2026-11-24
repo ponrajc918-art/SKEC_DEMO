@@ -333,6 +333,13 @@ h2 {
   margin-top: 2rem;
 }
 
+.feature-split {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
 .card {
   border: 1px solid var(--line);
   padding: 1.5rem;
@@ -1195,6 +1202,7 @@ th {
   }
 
   .grid,
+  .feature-split,
   .footer-grid,
   .metric-grid {
     grid-template-columns: 1fr;
